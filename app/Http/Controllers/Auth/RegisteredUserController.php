@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Tenant;
+use App\Services\TenantDatabaseService;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Auth\Events\Registered;
 
 class RegisteredUserController extends Controller
 {
@@ -50,6 +52,8 @@ class RegisteredUserController extends Controller
             'subdomain' => strtolower(str_replace(' ', '', $request->tenant)) . '.multi-tenancy-custom-multi.test',
             'database' => 'tenant_' . strtolower(str_replace(' ', '_', $request->tenant)),
         ]);
+
+        app(TenantDatabaseService::class)->createDB($tenant->database);
 
         event(new Registered($user));
 
