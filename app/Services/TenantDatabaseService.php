@@ -8,4 +8,12 @@ class TenantDatabaseService
     {
         \DB::statement("CREATE DATABASE " . $databaseName);
     }
+
+    public function connectToDB($tenant)
+    {
+        $database = $tenant->database;
+        config()->set('database.connections.tenant.database', $database);
+        \DB::purge('tenant');
+        \DB::reconnect('tenant');
+    }
 }
