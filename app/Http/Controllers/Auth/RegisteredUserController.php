@@ -52,12 +52,17 @@ class RegisteredUserController extends Controller
             'subdomain' => strtolower(str_replace(' ', '', $request->tenant)) . '.multi-tenancy-custom-multi.test',
             'database' => 'tenant_' . strtolower(str_replace(' ', '_', $request->tenant)),
         ]);
+        Auth::login($user);
+
 
         app(TenantDatabaseService::class)->createDB($tenant->database);
 
-        event(new Registered($user));
+        // connect to the newly created tenant database and run tenant migrations
+        // (do this here instead of in middleware to avoid switching DB/migrating on every request)
+        app(TenantDatabaseService::class)->connectToDB($tenant);
+        app(TenantDatabaseService::class)->migrateDB();
 
-        Auth::login($user);
+        event(new Registered($user));
 
         return redirect(route('dashboard', absolute: false));
     }

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Artisan;
+
 class TenantDatabaseService
 {
     public function createDB($databaseName)
@@ -15,5 +17,12 @@ class TenantDatabaseService
         config()->set('database.connections.tenant.database', $database);
         \DB::purge('tenant');
         \DB::reconnect('tenant');
+    }
+
+    public function migrateDB()
+    {
+        Artisan::call('migrate',[
+            '--path' => 'database/migrations/tenants',
+        ]);
     }
 }
